@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Radar Crash – Analyse des 46 derniers tours</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d1322;--bg2:#131b30;--panel:#18223b;--line:#273354;--txt:#e8edf9;--mute:#8d9bbd;--cy:#52d6ee;--am:#ffb547;--ro:#ff5f7e;--gr:#5be3a1;--r:18px}
+*{box-sizing:border-box;margin:0}
+body{font-family:"Space Grotesk",system-ui,sans-serif;background:radial-gradient(1200px 600px at 80% -10%,#1c2a55 0,transparent 60%),radial-gradient(900px 500px at -10% 110%,#2a1a45 0,transparent 55%),var(--bg);color:var(--txt);min-height:100vh;padding:20px;font-variant-numeric:tabular-nums}
+.wrap{max-width:1180px;margin:auto}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+h1{font-size:1.7rem;font-weight:700;letter-spacing:-.02em}
+h1 span{color:var(--cy)}
+.sub{color:var(--mute);font-size:.9rem;margin-top:2px}
+.pill{border:1px solid var(--line);background:var(--bg2);padding:7px 14px;border-radius:99px;font-size:.85rem;color:var(--mute)}
+.pill b{color:var(--txt)}
+.grid{display:grid;grid-template-columns:1.35fr 1fr;gap:16px}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+.col{display:flex;flex-direction:column;gap:16px}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:var(--r);padding:18px}
+.card h2{font-size:1rem;font-weight:500;color:var(--mute);margin-bottom:12px}
+.hero{text-align:center;position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:-40% -20% auto;height:80%;background:radial-gradient(closest-side,rgba(82,214,238,.18),transparent);pointer-events:none}
+.gauge{width:100%;max-width:340px;margin:auto;display:block}
+.cote{font-size:4rem;font-weight:700;line-height:1;margin-top:-72px;position:relative;letter-spacing:-.03em}
+.cote small{font-size:1.6rem;color:var(--mute);margin-left:2px}
+.signal{display:inline-block;margin-top:14px;padding:8px 20px;border-radius:99px;font-weight:700;font-size:1rem;transition:.25s}
+.s-go{background:rgba(91,227,161,.15);color:var(--gr);border:1px solid var(--gr)}
+.s-wait{background:rgba(255,95,126,.12);color:var(--ro);border:1px solid var(--ro)}
+.s-idle{background:var(--bg2);color:var(--mute);border:1px solid var(--line)}
+.why{color:var(--mute);font-size:.88rem;margin-top:10px;min-height:2.4em}
+.row{display:flex;gap:8px}
+input[type=text],input[type=number]{width:100%;background:var(--bg);border:1px solid var(--line);color:var(--txt);border-radius:12px;padding:12px 14px;font:inherit;font-size:1.05rem;outline:none}
+input:focus-visible,button:focus-visible{outline:2px solid var(--cy);outline-offset:2px}
+button{font:inherit;cursor:pointer;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--txt);padding:11px 16px;transition:.15s}
+button:hover{border-color:var(--cy)}
+button.main{background:var(--cy);color:#06222a;border-color:var(--cy);font-weight:700;white-space:nowrap}
+button.main:hover{filter:brightness(1.1)}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.tools button{padding:8px 12px;font-size:.85rem;color:var(--mute)}
+.hint{font-size:.8rem;color:var(--mute);margin-top:8px}
+.chart{position:relative;height:160px;display:flex;align-items:flex-end;gap:3px;padding:0 2px;border-bottom:1px solid var(--line)}
+.chart i{flex:1;min-width:3px;border-radius:4px 4px 0 0;transition:height .3s}
+.chart .ln{position:absolute;left:0;right:0;border-top:1px dashed rgba(255,255,255,.28);pointer-events:none}
+.chart .ln em{position:absolute;right:0;top:-17px;font-size:.7rem;color:var(--mute);font-style:normal}
+.legend{display:flex;gap:16px;font-size:.8rem;color:var(--mute);margin-top:10px;flex-wrap:wrap}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;background:var(--c)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media(max-width:560px){.stats{grid-template-columns:repeat(2,1fr)}}
+.st{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:12px}
+.st b{display:block;font-size:1.35rem}
+.st span{font-size:.78rem;color:var(--mute)}
+table{width:100%;border-collapse:collapse;font-size:.92rem}
+td,th{padding:8px 6px;text-align:left;border-bottom:1px solid var(--line)}
+th{color:var(--mute);font-weight:500;font-size:.8rem}
+tr.pick td{background:rgba(82,214,238,.09)}
+.bar{height:8px;border-radius:6px;background:var(--bg);overflow:hidden;min-width:70px}
+.bar div{height:100%;background:linear-gradient(90deg,var(--cy),var(--gr));border-radius:6px;transition:width .3s}
+.set{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.set label{font-size:.8rem;color:var(--mute);display:block;margin-bottom:5px}
+.set input{padding:9px 12px;font-size:.95rem}
+.tg{grid-column:1/-1;display:flex;align-items:center;gap:10px;font-size:.9rem}
+.tg input{width:18px;height:18px;accent-color:var(--cy)}
+.bank{font-size:2rem;font-weight:700}
+.pos{color:var(--gr)}.neg{color:var(--ro)}
+.log{max-height:150px;overflow:auto;margin-top:10px;font-size:.85rem}
+.log div{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--line)}
+.alert{display:none;padding:12px 14px;border-radius:12px;margin-bottom:12px;font-weight:500}
+.alert.on{display:block;background:rgba(255,181,71,.14);border:1px solid var(--am);color:var(--am)}
+.foot{margin-top:18px;padding:14px 16px;border:1px solid var(--line);border-radius:14px;color:var(--mute);font-size:.82rem;line-height:1.5;background:var(--bg2)}
+.foot b{color:var(--am)}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div><h1>Radar <span>Crash</span></h1><p class="sub">Analyse des derniers tours et cote conseillée entre 1.25 et 1.50</p></div>
+  <div class="pill">Tours analysés : <b id="cnt">0</b> / <b id="nTxt">46</b></div>
+</header>
+
+<div class="grid">
+<div class="col">
+  <section class="card">
+    <h2>Ajouter les résultats</h2>
+    <div class="row">
+      <input type="text" id="inp" inputmode="decimal" placeholder="Ex : 1.32  ou colle plusieurs valeurs d'un coup" autocomplete="off">
+      <button class="main" id="add">Ajouter</button>
+    </div>
+    <p class="hint">Entrée pour valider. Tu peux coller toute la liste (séparée par espaces, virgules ou retours à la ligne).</p>
+    <div class="tools">
+      <button id="undo">Annuler le dernier</button>
+      <button id="copy">Copier l'historique</button>
+      <button id="clear">Tout effacer</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Historique visuel</h2>
+    <div class="chart" id="chart"></div>
+    <div class="legend"><span style="--c:var(--ro)">Sous 1.25</span><span style="--c:var(--am)">1.25 à 1.50</span><span style="--c:var(--cy)">1.50 et plus</span></div>
+  </section>
+
+  <section class="card">
+    <h2>Statistiques de la fenêtre</h2>
+    <div class="stats">
+      <div class="st"><b id="sMoy">–</b><span>Moyenne (plafonnée à 10)</span></div>
+      <div class="st"><b id="sMed">–</b><span>Médiane</span></div>
+      <div class="st"><b id="sLow">–</b><span>Tours sous 1.25</span></div>
+      <div class="st"><b id="sGap">–</b><span>Tours depuis le dernier 2.00+</span></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Taux de réussite par cote</h2>
+    <table>
+      <thead><tr><th>Cote</th><th>Historique</th><th></th><th>Théorie*</th></tr></thead>
+      <tbody id="tbl"></tbody>
+    </table>
+    <p class="hint">*Probabilité théorique d'un jeu équitable avec 1 % d'avantage pour la maison : 0.99 ÷ cote.</p>
+  </section>
+</div>
+
+<div class="col">
+  <section class="card hero">
+    <h2>Cote conseillée</h2>
+    <svg class="gauge" viewBox="0 0 200 110" aria-hidden="true">
+      <defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#ff5f7e"/><stop offset=".5" stop-color="#ffb547"/><stop offset="1" stop-color="#52d6ee"/></linearGradient></defs>
+      <path d="M20 100 A80 80 0 0 1 180 100" fill="none" stroke="#273354" stroke-width="14" stroke-linecap="round"/>
+      <path id="arc" d="M20 100 A80 80 0 0 1 180 100" fill="none" stroke="url(#g)" stroke-width="14" stroke-linecap="round" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100" style="transition:stroke-dashoffset .5s"/>
+    </svg>
+    <div class="cote"><span id="cote">–</span><small>x</small></div>
+    <div id="sig" class="signal s-idle">En attente de données</div>
+    <p class="why" id="why">Ajoute au moins 10 résultats pour lancer l'analyse.</p>
+  </section>
+
+  <section class="card">
+    <h2>Simulation de session</h2>
+    <div class="alert" id="alert"></div>
+    <div class="bank" id="bank">0</div>
+    <div id="pl" style="font-size:.9rem;margin-top:4px">–</div>
+    <div class="stats" style="grid-template-columns:repeat(3,1fr);margin-top:12px">
+      <div class="st"><b id="kB">0</b><span>Mises</span></div>
+      <div class="st"><b id="kW">0</b><span>Gagnées</span></div>
+      <div class="st"><b id="kR">–</b><span>Réussite</span></div>
+    </div>
+    <div class="log" id="log"></div>
+    <div class="tools"><button id="rst">Réinitialiser la session</button></div>
+    <p class="hint">Quand le signal est « Jouer » et que tu ajoutes un résultat, la mise est simulée automatiquement.</p>
+  </section>
+
+  <section class="card">
+    <h2>Options</h2>
+    <div class="set">
+      <div><label for="oN">Fenêtre d'analyse (tours)</label><input type="number" id="oN" min="10" max="200"></div>
+      <div><label for="oT">Réussite minimale exigée (%)</label><input type="number" id="oT" min="50" max="95"></div>
+      <div><label for="oBk">Capital de départ</label><input type="number" id="oBk" min="1"></div>
+      <div><label for="oM">Mise (% du capital)</label><input type="number" id="oM" min="0.5" max="50" step="0.5"></div>
+      <div><label for="oSL">Stop perte (montant)</label><input type="number" id="oSL" min="0"></div>
+      <div><label for="oTP">Objectif gain (montant)</label><input type="number" id="oTP" min="0"></div>
+      <label class="tg"><input type="checkbox" id="oR"> Donner plus de poids aux tours récents</label>
+      <label class="tg"><input type="checkbox" id="oTr"> Simuler les mises automatiquement</label>
+    </div>
+  </section>
+</div>
+</div>
+
+<div class="foot"><b>À savoir :</b> chaque tour d'un jeu crash est indépendant et tiré au hasard. Cet outil ne prédit pas le prochain résultat : il mesure ce qui s'est passé sur les derniers tours et en tire la cote la plus régulière. Aucune méthode ne bat l'avantage de la maison sur la durée. Ne mise que ce que tu peux perdre et respecte ton stop perte.</div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s), COTES=[1.25,1.30,1.35,1.40,1.45,1.50], KEY="radar-crash-v1";
+let S={vals:[],bank:1000,log:[],set:{n:46,thr:75,rec:true,track:true,mise:5,bank:1000,sl:200,tp:300}};
+try{const d=JSON.parse(localStorage.getItem(KEY));if(d){S=d;S.set=Object.assign({n:46,thr:75,rec:true,track:true,mise:5,bank:1000,sl:200,tp:300},d.set)}}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const f2=x=>x.toFixed(2), money=x=>(Math.round(x*100)/100).toLocaleString("fr-FR");
+
+function parse(t){return t.replace(/,/g,".").replace(/x/gi," ").split(/[\s;]+/).map(parseFloat).filter(v=>isFinite(v)&&v>=1)}
+
+function analyse(){
+  const w=S.vals.slice(-S.set.n); if(w.length<10)return null;
+  const wt=w.map((_,i)=>S.set.rec?1+i/w.length:1), tot=wt.reduce((a,b)=>a+b,0);
+  const rows=COTES.map(c=>({c,hit:w.reduce((s,v,i)=>s+(v>=c?wt[i]:0),0)/tot,theo:.99/c}));
+  const ok=rows.filter(r=>r.hit*100>=S.set.thr);
+  const pick=ok.length?ok[ok.length-1]:rows[0];
+  const last5=w.slice(-5), l5=last5.filter(v=>v>=pick.c).length/last5.length;
+  return{w,rows,pick,play:ok.length>0&&l5>=0.6,l5,n:w.length}
+}
+
+function render(){
+  const a=analyse(), w=S.vals.slice(-S.set.n);
+  $("cnt").textContent=w.length; $("nTxt").textContent=S.set.n;
+  // chart
+  const ch=$("chart"); ch.innerHTML="";
+  const cap=4;
+  w.forEach(v=>{const i=document.createElement("i");i.style.height=Math.min(v,cap)/cap*100+"%";i.style.background=v<1.25?"var(--ro)":v<1.5?"var(--am)":"var(--cy)";i.title=f2(v)+"x";ch.appendChild(i)});
+  [1.25,1.5].forEach(m=>{const l=document.createElement("div");l.className="ln";l.style.bottom=m/cap*100+"%";l.innerHTML="<em>"+m+"x</em>";ch.appendChild(l)});
+  // stats
+  if(w.length){
+    const s=[...w].sort((x,y)=>x-y),med=s.length%2?s[(s.length-1)/2]:(s[s.length/2-1]+s[s.length/2])/2;
+    $("sMoy").textContent=f2(w.reduce((x,v)=>x+Math.min(v,10),0)/w.length);
+    $("sMed").textContent=f2(med);
+    $("sLow").textContent=w.filter(v=>v<1.25).length;
+    let g=0;for(let i=w.length-1;i>=0&&w[i]<2;i--)g++;$("sGap").textContent=g;
+  }else["sMoy","sMed","sLow","sGap"].forEach(k=>$(k).textContent="–");
+  // table + hero
+  const tb=$("tbl");tb.innerHTML="";
+  if(!a){$("cote").textContent="–";$("arc").style.strokeDashoffset=100;$("sig").className="signal s-idle";$("sig").textContent="En attente de données";$("why").textContent="Ajoute au moins 10 résultats pour lancer l'analyse."}
+  else{
+    a.rows.forEach(r=>{const tr=document.createElement("tr");if(r.c===a.pick.c)tr.className="pick";
+      tr.innerHTML=`<td><b>${f2(r.c)}x</b></td><td>${Math.round(r.hit*100)}%</td><td><div class="bar"><div style="width:${r.hit*100}%"></div></div></td><td style="color:var(--mute)">${Math.round(r.theo*100)}%</td>`;tb.appendChild(tr)});
+    $("cote").textContent=f2(a.pick.c);
+    $("arc").style.strokeDashoffset=100-(a.pick.c-1.25)/0.25*100;
+    const sg=$("sig");sg.className="signal "+(a.play?"s-go":"s-wait");sg.textContent=a.play?"Jouer":"Attendre";
+    const hit=Math.round(a.pick.hit*100),r5=Math.round(a.l5*100);
+    $("why").textContent=a.play?`Cote atteinte ${hit}% du temps sur ${a.n} tours, et ${r5}% sur les 5 derniers.`:(hit<S.set.thr?`Aucune cote n'atteint ${S.set.thr}% sur ${a.n} tours : la plus basse est affichée.`:`Cote régulière sur ${a.n} tours (${hit}%), mais seulement ${r5}% sur les 5 derniers : mieux vaut attendre.`);
+  }
+  // session
+  const b=S.bank,p=b-S.set.bank,nb=S.log.length,nw=S.log.filter(x=>x.win).length;
+  $("bank").textContent=money(b);
+  $("pl").innerHTML=`<span class="${p>=0?"pos":"neg"}">${p>=0?"+":""}${money(p)}</span> depuis le départ`;
+  $("kB").textContent=nb;$("kW").textContent=nw;$("kR").textContent=nb?Math.round(nw/nb*100)+"%":"–";
+  $("log").innerHTML=S.log.slice(-8).reverse().map(x=>`<div><span>Cote ${f2(x.c)}x → crash ${f2(x.v)}x</span><span class="${x.win?"pos":"neg"}">${x.win?"+":"−"}${money(Math.abs(x.d))}</span></div>`).join("");
+  const al=$("alert");al.className="alert";
+  if(S.set.sl>0&&p<=-S.set.sl){al.className="alert on";al.textContent="Stop perte atteint : arrête la session."}
+  else if(S.set.tp>0&&p>=S.set.tp){al.className="alert on";al.textContent="Objectif de gain atteint : pense à encaisser et arrêter."}
+  save();
+}
+
+function add(list){
+  const single=list.length===1;
+  list.forEach(v=>{
+    if(single&&S.set.track){const a=analyse();if(a&&a.play){
+      const stake=S.bank*S.set.mise/100,win=v>=a.pick.c,d=win?stake*(a.pick.c-1):-stake;
+      S.bank+=d;S.log.push({c:a.pick.c,v,win,d})}}
+    S.vals.push(v);
+  });
+  if(S.vals.length>500)S.vals=S.vals.slice(-500);
+  render();
+}
+
+const inp=$("inp");
+function submit(){const l=parse(inp.value);if(l.length){add(l);inp.value=""}inp.focus()}
+$("add").onclick=submit;
+inp.addEventListener("keydown",e=>{if(e.key==="Enter")submit()});
+$("undo").onclick=()=>{S.vals.pop();render()};
+$("clear").onclick=()=>{if(confirm("Effacer tout l'historique ?")){S.vals=[];render()}};
+$("rst").onclick=()=>{S.bank=S.set.bank;S.log=[];render()};
+$("copy").onclick=()=>{const t=S.vals.slice(-S.set.n).map(f2).join(" ");(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>{$("copy").textContent="Copié";setTimeout(()=>$("copy").textContent="Copier l'historique",1200)}).catch(()=>prompt("Copie l'historique :",t))};
+
+const map={oN:"n",oT:"thr",oBk:"bank",oM:"mise",oSL:"sl",oTP:"tp"};
+Object.keys(map).forEach(id=>{const el=$(id);el.value=S.set[map[id]];
+  el.addEventListener("change",()=>{let v=parseFloat(el.value);if(!isFinite(v))v=S.set[map[id]];S.set[map[id]]=v;
+    if(id==="oBk"){S.bank=v;S.log=[]}render()})});
+$("oR").checked=S.set.rec;$("oTr").checked=S.set.track;
+$("oR").onchange=e=>{S.set.rec=e.target.checked;render()};
+$("oTr").onchange=e=>{S.set.track=e.target.checked;render()};
+render();
+</script>
+</body>
+</html>
